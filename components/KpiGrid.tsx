@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { KpiCard } from './KpiCard';
 import { CustomersTable, type Customer } from './CustomersTable';
@@ -20,7 +21,6 @@ export type KpiCardData = {
 export function KpiGrid({ items }: { items: KpiCardData[] }) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
-  // Close on Escape
   useEffect(() => {
     if (openIdx === null) return;
     const handler = (e: KeyboardEvent) => {
@@ -30,7 +30,6 @@ export function KpiGrid({ items }: { items: KpiCardData[] }) {
     return () => window.removeEventListener('keydown', handler);
   }, [openIdx]);
 
-  // Lock body scroll while modal open
   useEffect(() => {
     if (openIdx !== null) {
       const prev = document.body.style.overflow;
@@ -80,9 +79,15 @@ function Modal({
   children: React.ReactNode;
   onClose: () => void;
 }) {
-  return (
+  // Render via portal so modal escapes any parent stacking context / transform / filter
+  // that would otherwise contain `position: fixed`.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] bg-bb-mist/60 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[100] bg-bb-ink/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
       onClick={onClose}
     >
       <div
@@ -101,6 +106,7 @@ function Modal({
         </div>
         <div className="p-4 sm:p-6 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
