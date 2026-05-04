@@ -117,17 +117,27 @@ export function timeSeriesByDay(opts: {
   return Object.entries(dayBuckets).map(([date, v]) => ({ date, ...v }));
 }
 
-export function planBreakdown(rows: SheetRow[], range: DateRange, dateField: string) {
-  const buckets: Record<string, number> = { Plus: 0, Gold: 0, Platinum: 0 };
+export type PlanSlice = {
+  name: string;
+  value: number;
+  customers: { name: string; email: string }[];
+};
+
+export function planBreakdown(rows: SheetRow[], range: DateRange, dateField: string): PlanSlice[] {
+  const buckets: Record<string, PlanSlice['customers']> = { Plus: [], Gold: [], Platinum: [] };
   for (const r of rows) {
     const d = parseSheetDate(r[dateField] || '');
     if (!d || !inRange(d, range)) continue;
     const plan = isStandardPlan(r['Plan Name'] || '');
-    if (plan) buckets[plan]++;
+    if (!plan) continue;
+    const email = (r['Email'] || '').trim();
+    if (!email) continue;
+    const fullName = `${r['First Name'] || ''} ${r['Last Name'] || ''}`.trim() || email;
+    buckets[plan].push({ name: fullName, email });
   }
   return [
-    { name: 'Plus', value: buckets.Plus },
-    { name: 'Gold', value: buckets.Gold },
-    { name: 'Platinum', value: buckets.Platinum },
+    { name: 'Plus',     value: buckets.Plus.length,     customers: buckets.Plus },
+    { name: 'Gold',     value: buckets.Gold.length,     customers: buckets.Gold },
+    { name: 'Platinum', value: buckets.Platinum.length, customers: buckets.Platinum },
   ];
 }

@@ -15,6 +15,7 @@ import { CustomersTable } from '@/components/CustomersTable';
 import { WatchList } from '@/components/WatchList';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { SystemStatus } from '@/components/SystemStatus';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { buildCustomerList, buildKpiCustomers } from '@/lib/customers';
 
 export const dynamic = 'force-dynamic';
@@ -106,24 +107,30 @@ export default async function DashboardPage({
           <DateRangePicker />
         </div>
 
-        <KpiGrid items={kpiItems} />
+        <ErrorBoundary label="KPI cards"><KpiGrid items={kpiItems} /></ErrorBoundary>
 
-        <TimeSeriesChart data={series} />
+        <ErrorBoundary label="Time-series chart"><TimeSeriesChart data={series} /></ErrorBoundary>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <WatchList fc={fc} ac={ac} fp={fp} resub={resub} />
-          <SystemStatus />
+          <ErrorBoundary label="Watch List"><WatchList fc={fc} ac={ac} fp={fp} resub={resub} /></ErrorBoundary>
+          <ErrorBoundary label="System Status"><SystemStatus /></ErrorBoundary>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ActivityFeed ac={ac} fc={fc} fp={fp} resub={resub} />
+          <ErrorBoundary label="Recent Activity"><ActivityFeed ac={ac} fc={fc} fp={fp} resub={resub} /></ErrorBoundary>
           <div className="grid grid-cols-1 gap-4">
-            <PlanBreakdown title="Cancellations by Plan" data={cancelByPlan} />
-            <PlanBreakdown title="Returning Customers by Plan" data={resubByPlan} />
+            <ErrorBoundary label="Cancellations by Plan">
+              <PlanBreakdown title="Cancellations by Plan" data={cancelByPlan} ac={ac} fc={fc} fp={fp} resub={resub} />
+            </ErrorBoundary>
+            <ErrorBoundary label="Returning Customers by Plan">
+              <PlanBreakdown title="Returning Customers by Plan" data={resubByPlan} ac={ac} fc={fc} fp={fp} resub={resub} />
+            </ErrorBoundary>
           </div>
         </div>
 
-        <CustomersTable customers={buildCustomerList({ ac, fc, fp, resub })} />
+        <ErrorBoundary label="Customers table">
+          <CustomersTable customers={buildCustomerList({ ac, fc, fp, resub })} />
+        </ErrorBoundary>
 
         {needsReviewCount > 0 && (
           <div className="bg-bb-magenta/10 border border-bb-magenta/30 rounded-xl p-4 flex items-center justify-between">
