@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { AUTH_COOKIE_NAME, isAuthCookieValid } from '@/lib/auth';
 
-// Single source of truth for the dashboard's view of automation health.
 // Returns last-execution metadata for each workflow we care about.
-// Reads N8N_API_KEY + N8N_API_URL from env vars; if not set, returns empty.
+// Locked behind the dashboard password so only signed-in viewers can see it.
 
 type WorkflowStatus = {
   id: string;
   name: string;
   active: boolean;
-  lastExecutedAt: string | null;  // ISO
+  lastExecutedAt: string | null;
   lastStatus: string | null;
 };
 
@@ -25,6 +26,14 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 30;
 
 export async function GET() {
+  // Auth gate — only signed-in users can read this
+  const cookieStore = cookies();
+  const authCookie = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+  const valid = await isAuthCookieValid(authCookie);
+  if (!valid) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   const apiKey = process.env.N8N_API_KEY;
   const apiUrl = process.env.N8N_API_URL;
   if (!apiKey || !apiUrl) {
@@ -38,14 +47,12 @@ export async function GET() {
   const results: WorkflowStatus[] = [];
   for (const wf of WORKFLOWS) {
     try {
-      // 1. Get workflow info (active flag, name)
       const wRes = await fetch(`${apiUrl}/workflows/${wf.id}`, {
         headers: { 'X-N8N-API-KEY': apiKey },
         cache: 'no-store',
       });
       const wInfo = wRes.ok ? await wRes.json() : null;
 
-      // 2. Get latest execution
       const eRes = await fetch(
         `${apiUrl}/executions?workflowId=${wf.id}&limit=1`,
         { headers: { 'X-N8N-API-KEY': apiKey }, cache: 'no-store' },
