@@ -1,6 +1,10 @@
+'use client';
+
+import { useState, useMemo } from 'react';
 import { Activity } from 'lucide-react';
 import type { SheetRow } from '@/lib/sheets';
 import { parseSheetDate, isStandardPlan } from '@/lib/sheets';
+import { CustomerDetail } from './CustomerDetail';
 
 type Event = {
   date: Date;
@@ -10,11 +14,11 @@ type Event = {
   plan: string;
 };
 
-const TYPE_LABEL: Record<Event['type'], { label: string; color: string; verb: string }> = {
-  cancelled:        { label: 'Cancelled',        color: 'bg-bb-magenta',  verb: 'cancelled' },
-  scheduled:        { label: 'Scheduled',        color: 'bg-amber-500',   verb: 'scheduled cancellation' },
-  failed_payment:   { label: 'Payment Failed',   color: 'bg-red-500',     verb: 'cancelled (payment failed)' },
-  returned:         { label: 'Returned',         color: 'bg-emerald-500', verb: 'came back' },
+const TYPE_LABEL: Record<Event['type'], { color: string; verb: string }> = {
+  cancelled:        { color: 'bg-bb-magenta',  verb: 'cancelled' },
+  scheduled:        { color: 'bg-amber-500',   verb: 'scheduled cancellation' },
+  failed_payment:   { color: 'bg-red-500',     verb: 'cancelled (payment failed)' },
+  returned:         { color: 'bg-emerald-500', verb: 'came back' },
 };
 
 function buildEvents(opts: { ac: SheetRow[]; fc: SheetRow[]; fp: SheetRow[]; resub: SheetRow[] }): Event[] {
@@ -66,7 +70,8 @@ export function ActivityFeed({
 }: {
   ac: SheetRow[]; fc: SheetRow[]; fp: SheetRow[]; resub: SheetRow[];
 }) {
-  const events = buildEvents({ ac, fc, fp, resub }).slice(0, 20);
+  const events = useMemo(() => buildEvents({ ac, fc, fp, resub }).slice(0, 20), [ac, fc, fp, resub]);
+  const [openEmail, setOpenEmail] = useState<string | null>(null);
 
   return (
     <div className="bg-white rounded-xl card-shadow p-5">
@@ -82,22 +87,39 @@ export function ActivityFeed({
           {events.map((e, i) => {
             const meta = TYPE_LABEL[e.type];
             return (
-              <li key={`${e.email}-${e.type}-${i}`} className="flex items-start gap-3 text-sm">
-                <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${meta.color}`} />
-                <div className="min-w-0 flex-1">
-                  <div className="text-bb-ink">
-                    <span className="font-medium">{e.name}</span>{' '}
-                    <span className="text-bb-ink/60">{meta.verb}</span>
-                    {e.plan && <span className="text-bb-ink/60"> ({e.plan})</span>}
+              <li key={`${e.email}-${e.type}-${i}`}>
+                <button
+                  onClick={() => e.email && setOpenEmail(e.email)}
+                  disabled={!e.email}
+                  className="w-full flex items-start gap-3 text-sm text-left rounded-md p-1 -m-1 hover:bg-bb-mist disabled:cursor-default transition"
+                >
+                  <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${meta.color}`} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-bb-ink">
+                      <span className="font-medium">{e.name}</span>{' '}
+                      <span className="text-bb-ink/60">{meta.verb}</span>
+                      {e.plan && <span className="text-bb-ink/60"> ({e.plan})</span>}
+                    </div>
                   </div>
-                </div>
-                <span className="text-xs text-bb-ink/50 shrink-0 whitespace-nowrap">
-                  {relTime(e.date)}
-                </span>
+                  <span className="text-xs text-bb-ink/50 shrink-0 whitespace-nowrap">
+                    {relTime(e.date)}
+                  </span>
+                </button>
               </li>
             );
           })}
         </ul>
+      )}
+
+      {openEmail && (
+        <CustomerDetail
+          email={openEmail}
+          ac={ac}
+          fc={fc}
+          fp={fp}
+          resub={resub}
+          onClose={() => setOpenEmail(null)}
+        />
       )}
     </div>
   );

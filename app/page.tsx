@@ -111,7 +111,7 @@ export default async function DashboardPage({
         <TimeSeriesChart data={series} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <WatchList fc={fc} ac={ac} resub={resub} />
+          <WatchList fc={fc} ac={ac} fp={fp} resub={resub} />
           <SystemStatus />
         </div>
 
