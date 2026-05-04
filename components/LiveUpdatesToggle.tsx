@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Wifi, WifiOff } from 'lucide-react';
+import { WifiOff } from 'lucide-react';
 
 const STORAGE_KEY = 'bb_live_updates';
 
@@ -46,7 +46,11 @@ export function LiveUpdatesToggle() {
       className="text-sm bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-md transition flex items-center gap-2"
       title={enabled ? `Auto-refreshing every 30s (next in ${secondsLeft}s)` : 'Auto-refresh paused'}
     >
-      {enabled ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4 opacity-60" />}
+      {enabled ? (
+        <span className="bb-live-dot inline-block w-2 h-2 rounded-full bg-emerald-400" />
+      ) : (
+        <WifiOff className="w-4 h-4 opacity-60" />
+      )}
       <span className="hidden sm:inline">
         {enabled ? `Live (${secondsLeft}s)` : 'Paused'}
       </span>

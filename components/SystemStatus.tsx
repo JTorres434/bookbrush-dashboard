@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Heart, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { BBSpinner, BBSkeleton } from './Spinner';
 
 type WorkflowStatus = {
   id: string;
@@ -100,7 +101,15 @@ export function SystemStatus() {
       )}
 
       {!data && !error && (
-        <div className="text-sm text-bb-ink/40 py-2">Checking…</div>
+        <div className="mt-3 space-y-2">
+          <div className="flex items-center gap-2 text-sm text-bb-ink/50">
+            <BBSpinner size="xs" />
+            <span>Checking workflow health…</span>
+          </div>
+          <BBSkeleton className="h-9 w-full" />
+          <BBSkeleton className="h-9 w-full" />
+          <BBSkeleton className="h-9 w-3/4" />
+        </div>
       )}
 
       {data && !data.configured && (

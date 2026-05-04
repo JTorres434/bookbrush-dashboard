@@ -2,7 +2,8 @@
 
 import { useTransition, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Calendar, Loader2 } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+import { BBSpinner } from './Spinner';
 
 const PRESETS = ['Last 7 days', 'Last 30 days', 'Last 90 days', 'Year to date'];
 
@@ -34,7 +35,7 @@ export function DateRangePicker() {
   return (
     <div className="bg-white rounded-xl card-shadow p-3 inline-flex items-center gap-2 flex-wrap relative">
       {isPending ? (
-        <Loader2 className="w-4 h-4 text-bb-purple ml-1 animate-spin" />
+        <BBSpinner size="sm" className="ml-1" />
       ) : (
         <Calendar className="w-4 h-4 text-bb-ink/60 ml-1" />
       )}
@@ -52,7 +53,7 @@ export function DateRangePicker() {
                 : 'text-bb-ink/70 hover:bg-bb-mist'
             } ${isPending && !active ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+            {isLoading && <BBSpinner size="xs" className="text-white" />}
             {preset}
           </button>
         );

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { BBDots } from '@/components/Spinner';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -59,9 +60,16 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading || !password}
-          className="w-full bg-bb-gradient text-white font-semibold py-3 rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+          className="w-full bg-bb-gradient text-white font-semibold py-3 rounded-lg hover:opacity-90 disabled:opacity-60 transition inline-flex items-center justify-center gap-2"
         >
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? (
+            <>
+              <span>Signing in</span>
+              <BBDots />
+            </>
+          ) : (
+            'Sign in'
+          )}
         </button>
       </form>
     </main>

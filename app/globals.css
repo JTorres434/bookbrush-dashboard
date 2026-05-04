@@ -40,3 +40,137 @@ html, body {
 .dark .card-shadow {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.4);
 }
+
+/* ---------- Branded loading primitives ---------- */
+
+/* Gradient ring spinner — a conic gradient with a radial mask cutout that rotates */
+.bb-spinner {
+  --bb-ring: 2px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(138, 76, 208, 0.15) 10%,
+    #8a4cd0 45%,
+    #d12a72 80%,
+    transparent 100%
+  );
+  -webkit-mask: radial-gradient(circle, transparent calc(50% - var(--bb-ring)), black calc(50% - var(--bb-ring) + 1px));
+          mask: radial-gradient(circle, transparent calc(50% - var(--bb-ring)), black calc(50% - var(--bb-ring) + 1px));
+  animation: bb-spin 0.85s linear infinite;
+}
+
+@keyframes bb-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Three pulsing dots in BB gradient */
+.bb-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.bb-dots > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #5b1f9e, #d12a72);
+  animation: bb-pulse 1.2s ease-in-out infinite both;
+}
+.bb-dots > span:nth-child(1) { animation-delay: -0.32s; }
+.bb-dots > span:nth-child(2) { animation-delay: -0.16s; }
+.bb-dots > span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes bb-pulse {
+  0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Shimmering skeleton block */
+.bb-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(91, 31, 158, 0.08) 0%, rgba(209, 42, 114, 0.08) 100%);
+}
+.bb-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: bb-shimmer 1.6s ease-in-out infinite;
+}
+.dark .bb-shimmer {
+  background: linear-gradient(90deg, rgba(138, 76, 208, 0.18) 0%, rgba(209, 42, 114, 0.18) 100%);
+}
+.dark .bb-shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes bb-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Soft pulsing halo behind a spinner */
+.bb-halo {
+  background: radial-gradient(circle, rgba(209, 42, 114, 0.35) 0%, rgba(91, 31, 158, 0.0) 70%);
+  filter: blur(12px);
+  animation: bb-halo 1.6s ease-in-out infinite;
+}
+@keyframes bb-halo {
+  0%, 100% { transform: scale(0.85); opacity: 0.6; }
+  50%      { transform: scale(1.15); opacity: 1; }
+}
+
+/* Subtle pulse for live-data indicators (e.g. status dots) */
+.bb-live-dot {
+  position: relative;
+}
+.bb-live-dot::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.4;
+  animation: bb-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes bb-ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+/* Soft brand gradient backdrop used by full-page loader (animated radial blobs) */
+.bb-loader-bg {
+  background:
+    radial-gradient(1200px 600px at 0% 0%, rgba(138, 76, 208, 0.18), transparent 60%),
+    radial-gradient(1000px 500px at 100% 100%, rgba(209, 42, 114, 0.18), transparent 60%),
+    #f6f3fb;
+  animation: bb-bg-drift 6s ease-in-out infinite alternate;
+}
+.dark .bb-loader-bg {
+  background:
+    radial-gradient(1200px 600px at 0% 0%, rgba(138, 76, 208, 0.25), transparent 60%),
+    radial-gradient(1000px 500px at 100% 100%, rgba(209, 42, 114, 0.22), transparent 60%),
+    #15102a;
+}
+@keyframes bb-bg-drift {
+  0%   { background-position: 0% 0%, 100% 100%, 0 0; }
+  100% { background-position: 10% 5%, 90% 95%, 0 0; }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .bb-spinner, .bb-dots > span, .bb-shimmer::after, .bb-halo, .bb-live-dot::before {
+    animation: none !important;
+  }
+}
