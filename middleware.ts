@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE_NAME, isAuthCookieValid } from '@/lib/auth';
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Public routes
@@ -15,7 +15,8 @@ export function middleware(req: NextRequest) {
   }
 
   const cookie = req.cookies.get(AUTH_COOKIE_NAME)?.value;
-  if (!isAuthCookieValid(cookie)) {
+  const valid = await isAuthCookieValid(cookie);
+  if (!valid) {
     const url = req.nextUrl.clone();
     url.pathname = '/signin';
     return NextResponse.redirect(url);

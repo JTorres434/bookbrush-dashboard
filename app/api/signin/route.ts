@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     if (typeof password !== 'string' || !isPasswordCorrect(password)) {
       return NextResponse.json({ ok: false, error: 'Invalid password' }, { status: 401 });
     }
-    const cookie = buildAuthCookie();
+    const cookie = await buildAuthCookie();
     const res = NextResponse.json({ ok: true });
     res.cookies.set(cookie.name, cookie.value, cookie.options);
     return res;
