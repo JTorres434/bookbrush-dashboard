@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from 'recha
 import type { PlanSlice } from '@/lib/metrics';
 import type { SheetRow } from '@/lib/sheets';
 import { CustomerDetail } from './CustomerDetail';
+import { Dialog, Avatar } from './Dialog';
 
 const COLORS: Record<string, string> = {
   Plus: '#8a4cd0',
@@ -115,40 +116,40 @@ function SliceCustomerList({
   onPickCustomer: (email: string) => void;
 }) {
   return (
-    <div
-      className="fixed inset-0 z-[105] bg-bb-ink/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
-      onClick={onClose}
+    <Dialog
+      icon={<PieIcon />}
+      title={slice.name}
+      subtitle={`${slice.value} customer${slice.value === 1 ? '' : 's'} on this plan`}
+      size="sm"
+      onClose={onClose}
     >
-      <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-5 py-4 border-b border-bb-ink/10 flex items-center justify-between">
-          <h3 className="font-semibold text-bb-ink">
-            {slice.name} <span className="text-bb-ink/50 font-normal text-sm">· {slice.value} customer{slice.value === 1 ? '' : 's'}</span>
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-sm text-bb-ink/50 hover:text-bb-ink"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
-        <ul className="overflow-y-auto p-2">
+      <div className="p-3">
+        <ul className="space-y-1">
           {slice.customers.map((c) => (
             <li key={c.email}>
               <button
                 onClick={() => onPickCustomer(c.email)}
-                className="w-full text-left px-3 py-2 rounded-md hover:bg-bb-mist transition"
+                className="w-full text-left p-3 rounded-lg bg-white hover:shadow-md hover:scale-[1.005] transition flex items-center gap-3"
               >
-                <div className="text-sm font-medium text-bb-ink">{c.name}</div>
-                <div className="text-xs text-bb-ink/60">{c.email}</div>
+                <Avatar name={c.name} size="sm" />
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-bb-ink truncate">{c.name}</div>
+                  <div className="text-xs text-bb-ink/60 truncate">{c.email}</div>
+                </div>
               </button>
             </li>
           ))}
         </ul>
       </div>
-    </div>
+    </Dialog>
+  );
+}
+
+function PieIcon() {
+  return (
+    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+      <path d="M22 12A10 10 0 0 0 12 2v10z" />
+    </svg>
   );
 }
