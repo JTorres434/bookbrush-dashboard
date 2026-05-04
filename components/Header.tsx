@@ -25,11 +25,12 @@ export function Header({
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <Image
-            src="https://bookbrush.com/custom-code/images/logo/logo-main.png"
+            src="https://bookbrush.com/custom-code/images/logo/logo-main-white-2.png"
             alt="Book Brush"
             width={140}
             height={40}
-            className="h-10 w-auto bg-white rounded px-2 py-1"
+            className="h-9 w-auto"
+            style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.35)) drop-shadow(0 0 1px rgba(0,0,0,0.4))' }}
             unoptimized
           />
           <span className="text-white/80 hidden sm:inline">|</span>

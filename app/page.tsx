@@ -57,15 +57,20 @@ export default async function DashboardPage({
   const tenure = tenureHistogram({ ac, range });
   const heatmap = cancellationHeatmap({ ac, fc, fp });
 
-  // New customers — fetched from Stripe (only if STRIPE_SECRET_KEY is configured)
-  const knownReturningEmails = new Set(
-    resub.map((r) => (r['Email'] || '').toLowerCase()).filter(Boolean),
-  );
-  const newCustomersResult = await fetchNewCustomersInRange({
-    startMs: range.start.getTime(),
-    endMs: range.end.getTime(),
-    knownReturningEmails,
-  });
+  // New customers — pre-compute three windows so the card can switch instantly.
+  const now = Date.now();
+  const day = 86400 * 1000;
+  const [nc7, nc30, nc90] = await Promise.all([
+    fetchNewCustomersInRange({ startMs: now - 7 * day, endMs: now }),
+    fetchNewCustomersInRange({ startMs: now - 30 * day, endMs: now }),
+    fetchNewCustomersInRange({ startMs: now - 90 * day, endMs: now }),
+  ]);
+  const newCustomersConfigured = nc7.configured || nc30.configured || nc90.configured;
+  const newCustomersBuckets = {
+    '7d': nc7.customers,
+    '30d': nc30.customers,
+    '90d': nc90.customers,
+  };
 
   // Daily series per KPI for sparklines
   const sparkCancel = series.map((d) => d.cancellations);
@@ -145,9 +150,8 @@ export default async function DashboardPage({
 
         <ErrorBoundary label="New Customers">
           <NewCustomersCard
-            configured={newCustomersResult.configured}
-            customers={newCustomersResult.customers}
-            rangeKey={rangeKey}
+            configured={newCustomersConfigured}
+            buckets={newCustomersBuckets}
           />
         </ErrorBoundary>
 

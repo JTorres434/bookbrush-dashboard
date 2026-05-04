@@ -13,51 +13,93 @@ const planBadgeClass = (plan: string) => {
   return 'bg-bb-ink/10 text-bb-ink/60';
 };
 
+export type NewCustomersBuckets = {
+  '7d': NewCustomerInfo[];
+  '30d': NewCustomerInfo[];
+  '90d': NewCustomerInfo[];
+};
+
+const BUCKET_LABELS: { key: keyof NewCustomersBuckets; label: string }[] = [
+  { key: '7d', label: 'Last 7 days' },
+  { key: '30d', label: 'Last 30 days' },
+  { key: '90d', label: 'Last 90 days' },
+];
+
 export function NewCustomersCard({
   configured,
-  customers,
-  rangeKey,
+  buckets,
 }: {
   configured: boolean;
-  customers: NewCustomerInfo[];
-  rangeKey: string;
+  buckets: NewCustomersBuckets;
 }) {
+  const [filter, setFilter] = useState<keyof NewCustomersBuckets>('30d');
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   if (!configured) {
     return (
-      <div className="bg-white rounded-xl card-shadow p-5 text-left">
-        <div className="text-sm text-bb-ink/60 font-medium flex items-center gap-1.5">
+      <div className="bg-white rounded-xl card-shadow p-5">
+        <div className="flex items-center gap-2 text-sm text-bb-ink/60 font-medium">
+          <UserPlus className="w-4 h-4" />
           New Customers
         </div>
         <div className="mt-2 text-3xl font-bold text-bb-ink/30">—</div>
         <div className="mt-2 text-xs text-bb-ink/50">
-          To enable, add <code className="text-[10px]">STRIPE_SECRET_KEY</code> to Vercel env vars.
+          To enable, add <code className="text-[10px]">STRIPE_SECRET_KEY</code> to Vercel env vars (use a restricted read-only key).
         </div>
       </div>
     );
   }
 
+  const customers = buckets[filter];
+
   return (
     <>
-      <button
-        onClick={() => customers.length > 0 && setOpen(true)}
-        className={`bg-white rounded-xl card-shadow p-5 text-left w-full transition ${
-          customers.length > 0 ? 'hover:scale-[1.02] hover:ring-2 hover:ring-bb-purple/20 cursor-pointer' : ''
-        }`}
-      >
-        <div className="text-sm text-bb-ink/60 font-medium flex items-center gap-1.5">
-          <UserPlus className="w-4 h-4" />
-          New Customers
-          {customers.length > 0 && (
-            <span className="text-[10px] text-bb-purple/60 ml-auto">click for details</span>
-          )}
+      <div className="bg-white rounded-xl card-shadow p-5">
+        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+          <div className="flex items-center gap-2 text-sm text-bb-ink/60 font-medium">
+            <UserPlus className="w-4 h-4" />
+            New Customers
+            <span className="text-xs text-bb-ink/40 font-normal">— first-time signups, paid</span>
+          </div>
+          <div className="flex gap-1">
+            {BUCKET_LABELS.map((b) => (
+              <button
+                key={b.key}
+                onClick={() => setFilter(b.key)}
+                className={`text-xs px-2.5 py-1 rounded-full transition ${
+                  filter === b.key
+                    ? 'bg-bb-gradient text-white'
+                    : 'bg-bb-mist text-bb-ink/70 hover:bg-bb-purple/10'
+                }`}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="mt-2 text-3xl font-bold text-emerald-600">{customers.length}</div>
-        <div className="mt-2 text-xs text-bb-ink/50">first-time signups in this period</div>
-      </button>
+
+        <button
+          onClick={() => customers.length > 0 && setOpen(true)}
+          disabled={customers.length === 0}
+          className={`w-full text-left ${
+            customers.length > 0
+              ? 'cursor-pointer hover:opacity-90 transition'
+              : 'cursor-default'
+          }`}
+        >
+          <div className="text-4xl font-bold text-emerald-600">{customers.length}</div>
+          <div className="mt-1 text-xs text-bb-ink/50">
+            {customers.length === 0
+              ? 'No new customers in this window.'
+              : `signed up & started paying in the ${BUCKET_LABELS.find((b) => b.key === filter)?.label.toLowerCase()}`}
+          </div>
+          {customers.length > 0 && (
+            <div className="mt-2 text-xs text-bb-purple/70">click to see who →</div>
+          )}
+        </button>
+      </div>
 
       {mounted && open && createPortal(
         <div
@@ -70,7 +112,9 @@ export function NewCustomersCard({
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-bb-ink/10 bg-white shrink-0">
               <h2 className="text-lg font-bold text-bb-ink">
-                New Customers · {rangeKey} <span className="text-bb-ink/50 font-normal">({customers.length})</span>
+                New Customers ·{' '}
+                {BUCKET_LABELS.find((b) => b.key === filter)?.label}
+                <span className="text-bb-ink/50 font-normal"> ({customers.length})</span>
               </h2>
               <button
                 onClick={() => setOpen(false)}
