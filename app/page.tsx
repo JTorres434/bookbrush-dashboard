@@ -164,16 +164,6 @@ export default async function DashboardPage({
 
         <ErrorBoundary label="KPI cards"><KpiGrid items={kpiItems} /></ErrorBoundary>
 
-        <ErrorBoundary label="Are we winning">
-          <WinLossSection
-            newCustomers={newCustomersInRange}
-            resubscriptions={kpis.resubscriptions}
-            cancellations={kpis.cancellations}
-            failedPayments={kpis.failedPaymentsAwaiting}
-            rangeKey={rangeKey}
-          />
-        </ErrorBoundary>
-
         <ErrorBoundary label="New Customers">
           <NewCustomersCard
             configured={newCustomersConfigured}
@@ -196,6 +186,16 @@ export default async function DashboardPage({
           <ErrorBoundary label="Recent Activity"><ActivityFeed ac={ac} fc={fc} fp={fp} resub={resub} /></ErrorBoundary>
           <ErrorBoundary label="How Long They Stayed"><TenureHistogram buckets={tenure} /></ErrorBoundary>
         </div>
+
+        <ErrorBoundary label="Are we winning">
+          <WinLossSection
+            newCustomers={newCustomersInRange}
+            resubscriptions={kpis.resubscriptions}
+            cancellations={kpis.cancellations}
+            failedPayments={kpis.failedPaymentsAwaiting}
+            rangeKey={rangeKey}
+          />
+        </ErrorBoundary>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <ErrorBoundary label="Cancellations by Plan">
