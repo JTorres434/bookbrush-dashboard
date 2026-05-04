@@ -36,6 +36,28 @@ export type Kpi = {
   failedPaymentsAwaiting: number;
 };
 
+// Compute the SAME date range but shifted backwards by one period length.
+// E.g. "Last 7 days" -> the 7 days before that.
+export function previousRange(range: DateRange): DateRange {
+  const ms = range.end.getTime() - range.start.getTime();
+  return {
+    start: new Date(range.start.getTime() - ms),
+    end: new Date(range.start.getTime() - 1),
+  };
+}
+
+export type KpiTrend = {
+  current: number;
+  previous: number;
+  deltaPct: number | null;  // null if previous = 0 (can't divide)
+};
+
+export function computeTrend(current: number, previous: number): KpiTrend {
+  if (previous === 0) return { current, previous, deltaPct: null };
+  const deltaPct = ((current - previous) / previous) * 100;
+  return { current, previous, deltaPct: Math.round(deltaPct * 10) / 10 };
+}
+
 export function computeKpis(opts: {
   ac: SheetRow[];
   fc: SheetRow[];
