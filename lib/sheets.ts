@@ -2,15 +2,16 @@
 // Uses Google's public gviz endpoint, which works on any sheet shared as
 // "Anyone with the link can view".
 
-const SHEET_ID = process.env.GOOGLE_SHEET_ID;
-if (!SHEET_ID) {
-  throw new Error('GOOGLE_SHEET_ID environment variable is required');
+function getSheetId(): string {
+  const id = process.env.GOOGLE_SHEET_ID;
+  if (!id) throw new Error('GOOGLE_SHEET_ID environment variable is required');
+  return id;
 }
 
 export type SheetRow = Record<string, string>;
 
 async function fetchTabRaw(tab: string): Promise<{ cols: string[]; rows: any[] } | null> {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+  const url = `https://docs.google.com/spreadsheets/d/${getSheetId()}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) return null;
   const text = await res.text();
