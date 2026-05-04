@@ -37,18 +37,23 @@ export function KpiGrid({ items }: { items: KpiCardData[] }) {
         {items.map((item, i) => {
           const hasList = !!item.customers && item.customers.length > 0;
           return (
-            <KpiCard
+            <div
               key={item.label}
-              label={item.label}
-              value={item.value}
-              suffix={item.suffix}
-              tone={item.tone}
-              hint={item.hint}
-              clickable={hasList}
-              onClick={hasList ? () => setOpenIdx(i) : undefined}
-              trend={item.trend}
-              sparkline={item.sparkline}
-            />
+              className="bb-fade-in-up"
+              style={{ animationDelay: `${i * 70}ms` }}
+            >
+              <KpiCard
+                label={item.label}
+                value={item.value}
+                suffix={item.suffix}
+                tone={item.tone}
+                hint={item.hint}
+                clickable={hasList}
+                onClick={hasList ? () => setOpenIdx(i) : undefined}
+                trend={item.trend}
+                sparkline={item.sparkline}
+              />
+            </div>
           );
         })}
       </div>

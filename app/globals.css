@@ -168,9 +168,58 @@ html, body {
   100% { background-position: 10% 5%, 90% 95%, 0 0; }
 }
 
+/* Top page-load progress bar (GitHub/YouTube style) */
+.bb-progress-track {
+  background: rgba(91, 31, 158, 0.08);
+}
+.bb-progress-fill {
+  width: 0%;
+  animation: bb-progress 1.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  box-shadow: 0 0 8px rgba(209, 42, 114, 0.5);
+}
+@keyframes bb-progress {
+  0%   { width: 0%; }
+  60%  { width: 70%; }
+  100% { width: 92%; }
+}
+
+/* Fade-up stagger for cards on mount */
+.bb-fade-in-up {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: bb-fade-up 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes bb-fade-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Sweeping highlight on the active filter pill while loading */
+.bb-pill-loading {
+  position: relative;
+  overflow: hidden;
+}
+.bb-pill-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: bb-pill-sweep 1.1s ease-in-out infinite;
+}
+@keyframes bb-pill-sweep {
+  100% { transform: translateX(100%); }
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  .bb-spinner, .bb-dots > span, .bb-shimmer::after, .bb-halo, .bb-live-dot::before {
+  .bb-spinner, .bb-dots > span, .bb-shimmer::after, .bb-halo, .bb-live-dot::before,
+  .bb-progress-fill, .bb-fade-in-up, .bb-pill-loading::after, .bb-loader-bg {
     animation: none !important;
   }
+  .bb-fade-in-up { opacity: 1; transform: none; }
 }

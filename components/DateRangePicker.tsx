@@ -4,6 +4,7 @@ import { useTransition, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar } from 'lucide-react';
 import { BBSpinner } from './Spinner';
+import { TopProgressBar } from './TopProgressBar';
 
 const PRESETS = ['Last 7 days', 'Last 30 days', 'Last 90 days', 'Year to date'];
 
@@ -33,6 +34,8 @@ export function DateRangePicker() {
   }
 
   return (
+    <>
+      {isPending && <TopProgressBar />}
     <div className="bg-white rounded-xl card-shadow p-3 inline-flex items-center gap-2 flex-wrap relative">
       {isPending ? (
         <BBSpinner size="sm" className="ml-1" />
@@ -51,7 +54,9 @@ export function DateRangePicker() {
               active
                 ? 'bg-bb-gradient text-white font-medium'
                 : 'text-bb-ink/70 hover:bg-bb-mist'
-            } ${isPending && !active ? 'opacity-50 cursor-not-allowed' : ''}`}
+            } ${isLoading ? 'bb-pill-loading' : ''} ${
+              isPending && !active ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             {isLoading && <BBSpinner size="xs" className="text-white" />}
             {preset}
@@ -59,5 +64,6 @@ export function DateRangePicker() {
         );
       })}
     </div>
+    </>
   );
 }

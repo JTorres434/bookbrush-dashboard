@@ -48,8 +48,9 @@ export function BBDots({ className = '' }: { className?: string }) {
 export function BBSkeleton({
   className = '',
   rounded = 'rounded-lg',
-}: { className?: string; rounded?: string }) {
-  return <div className={`bb-shimmer ${rounded} ${className}`} aria-hidden />;
+  style,
+}: { className?: string; rounded?: string; style?: React.CSSProperties }) {
+  return <div className={`bb-shimmer ${rounded} ${className}`} style={style} aria-hidden />;
 }
 
 /**

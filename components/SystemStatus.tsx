@@ -113,9 +113,12 @@ export function SystemStatus() {
       )}
 
       {data && !data.configured && (
-        <div className="text-xs text-bb-ink/60 mt-3 p-3 rounded-md bg-bb-mist/60">
-          <div className="font-medium mb-1">Status not configured.</div>
-          <div>To enable, add <code className="text-[11px]">N8N_API_KEY</code> and <code className="text-[11px]">N8N_API_URL</code> to Vercel environment variables.</div>
+        <div className="text-xs text-bb-ink/70 mt-3 p-3 rounded-md bg-bb-mist/60 flex items-start gap-2">
+          <span className="bb-live-dot inline-block w-2 h-2 rounded-full bg-amber-400 mt-1 shrink-0" />
+          <div>
+            <div className="font-medium text-bb-ink">JC is hooking this up.</div>
+            <div className="text-bb-ink/60 mt-0.5">Live workflow health will land here shortly.</div>
+          </div>
         </div>
       )}
 

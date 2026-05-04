@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Sparkline } from './Sparkline';
+import { MaybeCountUp } from './CountUp';
 
 type Tone = 'neutral' | 'positive' | 'warn';
 
@@ -56,7 +57,7 @@ export function KpiCard({
         )}
       </div>
       <div className={`mt-2 text-3xl font-bold ${toneStyles[tone]}`}>
-        {value}
+        <MaybeCountUp value={value} />
         {suffix && <span className="text-lg ml-1 font-medium opacity-70">{suffix}</span>}
       </div>
       {sparkline && sparkline.some((v) => v > 0) && (

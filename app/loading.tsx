@@ -1,5 +1,5 @@
-import { BBPageLoader } from '@/components/Spinner';
+import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 
 export default function Loading() {
-  return <BBPageLoader label="Refreshing data…" />;
+  return <DashboardSkeleton />;
 }
