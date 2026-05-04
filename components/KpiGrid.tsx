@@ -16,6 +16,8 @@ export type KpiCardData = {
   hint?: string;
   customers?: Customer[];
   modalTitle?: string;
+  trend?: { deltaPct: number | null; positiveIsGood?: boolean };
+  sparkline?: number[];
 };
 
 export function KpiGrid({ items }: { items: KpiCardData[] }) {
@@ -53,6 +55,8 @@ export function KpiGrid({ items }: { items: KpiCardData[] }) {
               hint={item.hint}
               clickable={hasList}
               onClick={hasList ? () => setOpenIdx(i) : undefined}
+              trend={item.trend}
+              sparkline={item.sparkline}
             />
           );
         })}

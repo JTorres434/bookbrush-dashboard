@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Sparkline } from './Sparkline';
 
 type Tone = 'neutral' | 'positive' | 'warn';
 
@@ -8,9 +9,15 @@ const toneStyles: Record<Tone, string> = {
   warn: 'text-bb-magenta',
 };
 
+const sparkColor: Record<Tone, string> = {
+  neutral: '#5b1f9e',
+  positive: '#059669',
+  warn: '#d12a72',
+};
+
 export type Trend = {
-  deltaPct: number | null;  // null = no comparison available
-  positiveIsGood?: boolean; // false for cancellations etc.
+  deltaPct: number | null;
+  positiveIsGood?: boolean;
 };
 
 export function KpiCard({
@@ -22,6 +29,7 @@ export function KpiCard({
   onClick,
   clickable,
   trend,
+  sparkline,
 }: {
   label: string;
   value: string | number;
@@ -31,6 +39,7 @@ export function KpiCard({
   onClick?: () => void;
   clickable?: boolean;
   trend?: Trend;
+  sparkline?: number[];
 }) {
   const Wrapper: any = clickable ? 'button' : 'div';
   return (
@@ -50,6 +59,9 @@ export function KpiCard({
         {value}
         {suffix && <span className="text-lg ml-1 font-medium opacity-70">{suffix}</span>}
       </div>
+      {sparkline && sparkline.some((v) => v > 0) && (
+        <Sparkline data={sparkline} color={sparkColor[tone]} />
+      )}
       {trend && <TrendIndicator trend={trend} />}
       {hint && <div className="mt-1 text-xs text-bb-ink/50">{hint}</div>}
     </Wrapper>

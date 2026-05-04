@@ -4,6 +4,7 @@ import { readAllSheets } from '@/lib/sheets';
 import {
   computeKpis, computeTrend, dateRangePresets, planBreakdown,
   previousRange, timeSeriesByDay,
+  detectTodaysAlerts, recoveryJourney, tenureHistogram, cancellationHeatmap,
 } from '@/lib/metrics';
 import { AUTH_COOKIE_NAME, isAuthCookieValid } from '@/lib/auth';
 import { Header } from '@/components/Header';
@@ -16,6 +17,10 @@ import { WatchList } from '@/components/WatchList';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { SystemStatus } from '@/components/SystemStatus';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { TodaysAlerts } from '@/components/TodaysAlerts';
+import { RecoveryJourney } from '@/components/RecoveryJourney';
+import { TenureHistogram } from '@/components/TenureHistogram';
+import { CalendarHeatmap } from '@/components/CalendarHeatmap';
 import { buildCustomerList, buildKpiCustomers } from '@/lib/customers';
 
 export const dynamic = 'force-dynamic';
@@ -40,10 +45,21 @@ export default async function DashboardPage({
   const kpis = computeKpis({ ac, fc, fp, resub, range });
   const prevKpis = computeKpis({ ac, fc, fp, resub, range: prevR });
 
-  const series = timeSeriesByDay({ ac, fc, resub, range });
+  const series = timeSeriesByDay({ ac, fc, fp, resub, range });
   const cancelByPlan = planBreakdown(ac, range, 'Date Plan Ended');
   const resubByPlan = planBreakdown(resub, range, 'Date Plan Reactivated');
   const kpiLists = buildKpiCustomers({ ac, fc, fp, resub, range });
+
+  const alerts = detectTodaysAlerts({ ac, fc, fp, resub });
+  const journey = recoveryJourney({ ac, fc, fp, resub, range });
+  const tenure = tenureHistogram({ ac, range });
+  const heatmap = cancellationHeatmap({ ac, fc, fp });
+
+  // Daily series per KPI for sparklines
+  const sparkCancel = series.map((d) => d.cancellations);
+  const sparkReturn = series.map((d) => d.resubscriptions);
+  const sparkNet = series.map((d) => d.resubscriptions - d.cancellations);
+  const sparkFP = series.map((d) => d.failedPayments);
 
   const needsReviewCount = needsReview.length;
   const sheetUrl = `https://docs.google.com/spreadsheets/d/${process.env.GOOGLE_SHEET_ID}/edit`;
@@ -56,6 +72,7 @@ export default async function DashboardPage({
       customers: kpiLists.cancellations,
       modalTitle: `Cancellations · ${rangeKey} (${kpiLists.cancellations.length})`,
       trend: { ...computeTrend(kpis.cancellations, prevKpis.cancellations), positiveIsGood: false },
+      sparkline: sparkCancel,
     },
     {
       label: 'Returning Customers',
@@ -64,6 +81,7 @@ export default async function DashboardPage({
       customers: kpiLists.resubscriptions,
       modalTitle: `Returning Customers · ${rangeKey} (${kpiLists.resubscriptions.length})`,
       trend: { ...computeTrend(kpis.resubscriptions, prevKpis.resubscriptions), positiveIsGood: true },
+      sparkline: sparkReturn,
     },
     {
       label: 'Net Change',
@@ -72,6 +90,7 @@ export default async function DashboardPage({
       customers: kpiLists.netChangeAll,
       modalTitle: `Net Change · ${rangeKey} (cancellations + returns)`,
       trend: { ...computeTrend(kpis.netChange, prevKpis.netChange), positiveIsGood: true },
+      sparkline: sparkNet,
     },
     {
       label: 'Recovery Rate',
@@ -90,6 +109,7 @@ export default async function DashboardPage({
       customers: kpiLists.failedPayments,
       modalTitle: `Failed Payments · ${rangeKey} (${kpiLists.failedPayments.length})`,
       trend: { ...computeTrend(kpis.failedPaymentsAwaiting, prevKpis.failedPaymentsAwaiting), positiveIsGood: false },
+      sparkline: sparkFP,
     },
   ];
 
@@ -107,9 +127,15 @@ export default async function DashboardPage({
           <DateRangePicker />
         </div>
 
+        <ErrorBoundary label="Today's Alerts"><TodaysAlerts alerts={alerts} /></ErrorBoundary>
+
         <ErrorBoundary label="KPI cards"><KpiGrid items={kpiItems} /></ErrorBoundary>
 
+        <ErrorBoundary label="Recovery Journey"><RecoveryJourney stages={journey} /></ErrorBoundary>
+
         <ErrorBoundary label="Time-series chart"><TimeSeriesChart data={series} /></ErrorBoundary>
+
+        <ErrorBoundary label="Calendar heatmap"><CalendarHeatmap cells={heatmap} /></ErrorBoundary>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <ErrorBoundary label="Watch List"><WatchList fc={fc} ac={ac} fp={fp} resub={resub} /></ErrorBoundary>
@@ -118,14 +144,16 @@ export default async function DashboardPage({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <ErrorBoundary label="Recent Activity"><ActivityFeed ac={ac} fc={fc} fp={fp} resub={resub} /></ErrorBoundary>
-          <div className="grid grid-cols-1 gap-4">
-            <ErrorBoundary label="Cancellations by Plan">
-              <PlanBreakdown title="Cancellations by Plan" data={cancelByPlan} ac={ac} fc={fc} fp={fp} resub={resub} />
-            </ErrorBoundary>
-            <ErrorBoundary label="Returning Customers by Plan">
-              <PlanBreakdown title="Returning Customers by Plan" data={resubByPlan} ac={ac} fc={fc} fp={fp} resub={resub} />
-            </ErrorBoundary>
-          </div>
+          <ErrorBoundary label="How Long They Stayed"><TenureHistogram buckets={tenure} /></ErrorBoundary>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ErrorBoundary label="Cancellations by Plan">
+            <PlanBreakdown title="Cancellations by Plan" data={cancelByPlan} ac={ac} fc={fc} fp={fp} resub={resub} />
+          </ErrorBoundary>
+          <ErrorBoundary label="Returning Customers by Plan">
+            <PlanBreakdown title="Returning Customers by Plan" data={resubByPlan} ac={ac} fc={fc} fp={fp} resub={resub} />
+          </ErrorBoundary>
         </div>
 
         <ErrorBoundary label="Customers table">
