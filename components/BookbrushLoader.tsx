@@ -17,11 +17,37 @@ const LETTERS = [
   { ch: 'H', from: '#de366f', to: '#e93e6e' },
 ];
 
+// Varied line widths simulating real prose. Numbers are paragraphs;
+// each entry is the width % of one line. A 0 means a paragraph break.
+const PROSE_WIDTHS = [
+  95, 92, 88, 90, 94, 72, 0,
+  96, 85, 92, 80, 88, 50, 0,
+  93, 90, 87, 95, 68,
+];
+
+function BookPageContent() {
+  return (
+    <div className="bb-book-page-content" aria-hidden>
+      <div className="bb-book-chapter">Chapter One</div>
+      {PROSE_WIDTHS.map((w, i) =>
+        w === 0 ? (
+          <div key={i} className="bb-book-para-gap" />
+        ) : (
+          <div key={i} className="bb-book-line" style={{ width: `${w}%` }} />
+        ),
+      )}
+      <div className="bb-book-page-number">— 1 —</div>
+    </div>
+  );
+}
+
 function OpeningBook() {
   return (
     <div className="bb-book" aria-hidden>
       <div className="bb-book-pages-edge" />
-      <div className="bb-book-body" />
+      <div className="bb-book-body">
+        <BookPageContent />
+      </div>
       <div className="bb-book-page" style={{ animationDelay: '0.4s' }} />
       <div className="bb-book-page" style={{ animationDelay: '0.85s' }} />
       <div className="bb-book-page" style={{ animationDelay: '1.3s' }} />
