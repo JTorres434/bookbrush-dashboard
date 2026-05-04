@@ -82,14 +82,14 @@ function Modal({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 bg-bb-ink/60 backdrop-blur-sm flex items-start justify-center p-4 sm:p-8 overflow-y-auto"
+      className="fixed inset-0 z-[100] bg-bb-ink/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
       onClick={onClose}
     >
       <div
-        className="bg-bb-mist rounded-2xl card-shadow max-w-6xl w-full my-8"
+        className="bg-bb-mist rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-bb-ink/10 bg-white rounded-t-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-bb-ink/10 bg-white shrink-0">
           <h2 className="text-lg font-bold text-bb-ink">{title}</h2>
           <button
             onClick={onClose}
@@ -99,7 +99,7 @@ function Modal({
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-4 sm:p-6">{children}</div>
+        <div className="p-4 sm:p-6 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
