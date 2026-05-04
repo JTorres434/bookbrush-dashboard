@@ -8,6 +8,8 @@ import { KpiCard } from '@/components/KpiCard';
 import { TimeSeriesChart } from '@/components/TimeSeriesChart';
 import { PlanBreakdown } from '@/components/PlanBreakdown';
 import { DateRangePicker } from '@/components/DateRangePicker';
+import { CustomersTable } from '@/components/CustomersTable';
+import { buildCustomerList } from '@/lib/customers';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -73,6 +75,8 @@ export default async function DashboardPage({
           <PlanBreakdown title="Cancellations by Plan" data={cancelByPlan} />
           <PlanBreakdown title="Resubscriptions by Plan" data={resubByPlan} />
         </div>
+
+        <CustomersTable customers={buildCustomerList({ ac, fc, fp, resub })} />
 
         {needsReviewCount > 0 && (
           <div className="bg-bb-magenta/10 border border-bb-magenta/30 rounded-xl p-4 flex items-center justify-between">
