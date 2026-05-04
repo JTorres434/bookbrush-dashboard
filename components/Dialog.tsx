@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+
+const EXIT_MS = 180;
 
 export function Dialog({
   title,
@@ -22,14 +24,32 @@ export function Dialog({
   size?: 'sm' | 'md' | 'lg';
 }) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [entered, setEntered] = useState(false);
+  const closingRef = useRef(false);
+
+  // Mount portal target, then on the *next* frame flip `entered` so the
+  // browser paints the off-state first and CSS transitions take effect.
   useEffect(() => {
-    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    setMounted(true);
+    const id = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const close = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setEntered(false);
+    setTimeout(onClose, EXIT_MS);
+  };
+
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
     window.addEventListener('keydown', k);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { window.removeEventListener('keydown', k); document.body.style.overflow = prev; };
-  }, [onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!mounted) return null;
 
@@ -37,11 +57,15 @@ export function Dialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[110] bg-bb-ink/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
-      onClick={onClose}
+      className={`fixed inset-0 z-[110] bg-bb-ink/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 transition-opacity duration-200 ${
+        entered ? 'opacity-100' : 'opacity-0'
+      }`}
+      onClick={close}
     >
       <div
-        className={`bg-white rounded-2xl shadow-2xl ${maxW} w-full max-h-[90vh] flex flex-col overflow-hidden relative`}
+        className={`bg-white rounded-2xl shadow-2xl ${maxW} w-full max-h-[90vh] flex flex-col overflow-hidden relative transition-all duration-200 ease-out ${
+          entered ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Gradient accent stripe */}
@@ -62,7 +86,7 @@ export function Dialog({
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={close}
               className="rounded-md p-1.5 hover:bg-bb-mist text-bb-ink/60 hover:text-bb-ink shrink-0"
               aria-label="Close"
             >
