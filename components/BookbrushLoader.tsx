@@ -1,9 +1,15 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { LoadingTrivia } from './LoadingTrivia';
 
 /**
  * Loader: a 3D book opens, three pages flip, then it closes — looped.
  * Below sits the smaller BOOKBRUSH wordmark with the brush-stroke wink,
  * a subtitle, and a rotating Book Brush FAQ tip.
+ *
+ * The book content advances per cycle (Chapter One, p. 1 → Chapter Two, p. 12 → ...)
+ * so it doesn't feel like the same page is just sitting there.
  */
 const LETTERS = [
   { ch: 'B', from: '#3e1671', to: '#5b1f9e' },
@@ -17,36 +23,61 @@ const LETTERS = [
   { ch: 'H', from: '#de366f', to: '#e93e6e' },
 ];
 
-// Varied line widths simulating real prose. Numbers are paragraphs;
-// each entry is the width % of one line. A 0 means a paragraph break.
-const PROSE_WIDTHS = [
-  95, 92, 88, 90, 94, 72, 0,
-  96, 85, 92, 80, 88, 50, 0,
-  93, 90, 87, 95, 68,
+const CHAPTERS = [
+  { name: 'One',    page: 1   },
+  { name: 'Two',    page: 12  },
+  { name: 'Three',  page: 27  },
+  { name: 'Four',   page: 41  },
+  { name: 'Five',   page: 58  },
+  { name: 'Six',    page: 73  },
+  { name: 'Seven',  page: 89  },
+  { name: 'Eight',  page: 102 },
+  { name: 'Nine',   page: 118 },
+  { name: 'Ten',    page: 134 },
 ];
 
-function BookPageContent() {
+// Three different prose patterns so each chapter doesn't look identical.
+const PROSE_VARIANTS: number[][] = [
+  [95, 92, 88, 90, 94, 72, 0, 96, 85, 92, 80, 88, 50, 0, 93, 90, 87, 95, 68],
+  [88, 96, 84, 92, 78, 90, 64, 0, 95, 89, 92, 86, 70, 0, 93, 91, 87, 80, 55],
+  [92, 86, 95, 89, 83, 70, 0, 90, 95, 88, 92, 82, 60, 0, 96, 89, 84, 90, 75],
+];
+
+function BookPageContent({ chapterIdx }: { chapterIdx: number }) {
+  const ch = CHAPTERS[chapterIdx % CHAPTERS.length];
+  const widths = PROSE_VARIANTS[chapterIdx % PROSE_VARIANTS.length];
   return (
     <div className="bb-book-page-content" aria-hidden>
-      <div className="bb-book-chapter">Chapter One</div>
-      {PROSE_WIDTHS.map((w, i) =>
+      <div className="bb-book-chapter">Chapter {ch.name}</div>
+      {widths.map((w, i) =>
         w === 0 ? (
           <div key={i} className="bb-book-para-gap" />
         ) : (
           <div key={i} className="bb-book-line" style={{ width: `${w}%` }} />
         ),
       )}
-      <div className="bb-book-page-number">— 1 —</div>
+      <div className="bb-book-page-number">— {ch.page} —</div>
     </div>
   );
 }
 
 function OpeningBook() {
+  const [chapterIdx, setChapterIdx] = useState(0);
+
+  useEffect(() => {
+    // The book-cover/page animations run on a 4s loop; advance the chapter
+    // each cycle so the book reads like progressive chapters, not a stuck page.
+    const id = setInterval(() => {
+      setChapterIdx((x) => (x + 1) % CHAPTERS.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="bb-book" aria-hidden>
       <div className="bb-book-pages-edge" />
       <div className="bb-book-body">
-        <BookPageContent />
+        <BookPageContent chapterIdx={chapterIdx} />
       </div>
       <div className="bb-book-page" style={{ animationDelay: '0.4s' }} />
       <div className="bb-book-page" style={{ animationDelay: '0.85s' }} />

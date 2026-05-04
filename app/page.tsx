@@ -22,6 +22,7 @@ import { RecoveryJourney } from '@/components/RecoveryJourney';
 import { TenureHistogram } from '@/components/TenureHistogram';
 import { CalendarHeatmap } from '@/components/CalendarHeatmap';
 import { NewCustomersCard } from '@/components/NewCustomersCard';
+import { WinLossSection } from '@/components/WinLossSection';
 import { buildCustomerList, buildKpiCustomers } from '@/lib/customers';
 import { fetchNewCustomersInRange } from '@/lib/stripe';
 
@@ -71,6 +72,16 @@ export default async function DashboardPage({
     '30d': nc30.customers,
     '90d': nc90.customers,
   };
+
+  // New-customer count inside the user's currently selected range. Use the
+  // 90-day bucket (which covers Last 7/30/90); for ranges older than 90 days
+  // (e.g. Year-to-date in late months) this under-counts but it is the best
+  // we have without a separate fetch.
+  const rangeStartMs = range.start.getTime();
+  const rangeEndMs = range.end.getTime();
+  const newCustomersInRange = nc90.customers.filter(
+    (c) => c.joinedAtUnixMs >= rangeStartMs && c.joinedAtUnixMs <= rangeEndMs,
+  ).length;
 
   // Daily series per KPI for sparklines
   const sparkCancel = series.map((d) => d.cancellations);
@@ -152,6 +163,16 @@ export default async function DashboardPage({
         <ErrorBoundary label="Today's Alerts"><TodaysAlerts alerts={alerts} /></ErrorBoundary>
 
         <ErrorBoundary label="KPI cards"><KpiGrid items={kpiItems} /></ErrorBoundary>
+
+        <ErrorBoundary label="Are we winning">
+          <WinLossSection
+            newCustomers={newCustomersInRange}
+            resubscriptions={kpis.resubscriptions}
+            cancellations={kpis.cancellations}
+            failedPayments={kpis.failedPaymentsAwaiting}
+            rangeKey={rangeKey}
+          />
+        </ErrorBoundary>
 
         <ErrorBoundary label="New Customers">
           <NewCustomersCard
