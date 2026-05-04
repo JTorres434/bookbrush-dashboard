@@ -193,6 +193,23 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Dialog enter / leave animations (CSS keyframes — fire automatically on mount,
+   no React render-timing dependency) */
+@keyframes bb-backdrop-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bb-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes bb-dialog-in {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes bb-dialog-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.96) translateY(8px); }
+}
+.bb-dialog-backdrop          { animation: bb-backdrop-in 220ms ease-out forwards; }
+.bb-dialog-backdrop.leaving  { animation: bb-backdrop-out 180ms ease-in forwards; }
+.bb-dialog-card              { animation: bb-dialog-in 280ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; transform-origin: center; }
+.bb-dialog-card.leaving      { animation: bb-dialog-out 180ms ease-in forwards; }
+
 /* BOOKBRUSH letter-by-letter loader */
 .bb-wordmark {
   /* Gradient fill on the text via background-clip */

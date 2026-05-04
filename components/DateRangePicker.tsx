@@ -1,10 +1,12 @@
 'use client';
 
-import { useTransition, useState } from 'react';
+import { useTransition, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar } from 'lucide-react';
 import { BBSpinner } from './Spinner';
 import { TopProgressBar } from './TopProgressBar';
+import { BookbrushLoader } from './BookbrushLoader';
 
 const PRESETS = ['Last 7 days', 'Last 30 days', 'Last 90 days', 'Year to date'];
 
@@ -36,6 +38,7 @@ export function DateRangePicker() {
   return (
     <>
       {isPending && <TopProgressBar />}
+      {isPending && <FilterLoadingOverlay />}
     <div className="bg-white rounded-xl card-shadow p-3 inline-flex items-center gap-2 flex-wrap relative">
       {isPending ? (
         <BBSpinner size="sm" className="ml-1" />
@@ -65,5 +68,22 @@ export function DateRangePicker() {
       })}
     </div>
     </>
+  );
+}
+
+/**
+ * Fixed-screen BOOKBRUSH overlay shown while a date-filter transition is in
+ * flight. Rendered into a portal so it floats above all dashboard content.
+ * Fades in via the same dialog-backdrop keyframe.
+ */
+function FilterLoadingOverlay() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return createPortal(
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bb-loader-bg bb-dialog-backdrop">
+      <BookbrushLoader subtitle="updating your range" />
+    </div>,
+    document.body,
   );
 }

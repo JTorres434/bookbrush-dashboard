@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -24,21 +24,13 @@ export function Dialog({
   size?: 'sm' | 'md' | 'lg';
 }) {
   const [mounted, setMounted] = useState(false);
-  const [entered, setEntered] = useState(false);
-  const closingRef = useRef(false);
+  const [leaving, setLeaving] = useState(false);
 
-  // Mount portal target, then on the *next* frame flip `entered` so the
-  // browser paints the off-state first and CSS transitions take effect.
-  useEffect(() => {
-    setMounted(true);
-    const id = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   const close = () => {
-    if (closingRef.current) return;
-    closingRef.current = true;
-    setEntered(false);
+    if (leaving) return;
+    setLeaving(true);
     setTimeout(onClose, EXIT_MS);
   };
 
@@ -54,18 +46,15 @@ export function Dialog({
   if (!mounted) return null;
 
   const maxW = { sm: 'max-w-md', md: 'max-w-3xl', lg: 'max-w-6xl' }[size];
+  const leavingCls = leaving ? 'leaving' : '';
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[110] bg-bb-ink/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 transition-opacity duration-200 ${
-        entered ? 'opacity-100' : 'opacity-0'
-      }`}
+      className={`fixed inset-0 z-[110] bg-bb-ink/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 bb-dialog-backdrop ${leavingCls}`}
       onClick={close}
     >
       <div
-        className={`bg-white rounded-2xl shadow-2xl ${maxW} w-full max-h-[90vh] flex flex-col overflow-hidden relative transition-all duration-200 ease-out ${
-          entered ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'
-        }`}
+        className={`bg-white rounded-2xl shadow-2xl ${maxW} w-full max-h-[90vh] flex flex-col overflow-hidden relative bb-dialog-card ${leavingCls}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Gradient accent stripe */}

@@ -137,8 +137,13 @@ export default async function DashboardPage({
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h2 className="text-2xl font-bold text-bb-ink">Overview</h2>
-            <p className="text-sm text-bb-ink/60 mt-1">
-              Live from the Google Sheet · click any number to see the customers behind it.
+            <p className="text-sm text-bb-ink/60 mt-1 flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="bb-live-dot inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="font-medium text-bb-ink/80">Real-time customer signal</span>
+              </span>
+              <span className="text-bb-ink/40">·</span>
+              <span>click any number to meet the people behind it.</span>
             </p>
           </div>
           <DateRangePicker />
