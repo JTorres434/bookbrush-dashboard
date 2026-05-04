@@ -210,27 +210,41 @@ html, body {
 .bb-dialog-card              { animation: bb-dialog-in 280ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; transform-origin: center; }
 .bb-dialog-card.leaving      { animation: bb-dialog-out 180ms ease-in forwards; }
 
-/* BOOKBRUSH letter-by-letter loader */
-.bb-wordmark {
-  /* Gradient fill on the text via background-clip */
-  background: linear-gradient(90deg, #5b1f9e 0%, #8a4cd0 40%, #d12a72 100%);
+/* BOOKBRUSH letter-by-letter loader — each letter carries its own gradient
+   (parent background-clip:text + transformed children doesn't paint reliably) */
+.bb-letter {
+  background: linear-gradient(135deg, var(--bb-from, #5b1f9e), var(--bb-to, #d12a72));
   -webkit-background-clip: text;
           background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 18px rgba(91, 31, 158, 0.35));
-}
-.bb-letter {
+  filter: drop-shadow(0 6px 14px rgba(91, 31, 158, 0.3));
   opacity: 0;
-  transform: translateY(14px) scale(0.6);
-  animation: bb-letter-cycle 2.6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite both;
+  transform: translateY(20px) scale(0.5);
+  animation: bb-letter-cycle 2.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite both;
 }
 @keyframes bb-letter-cycle {
-  0%   { opacity: 0; transform: translateY(14px) scale(0.6) rotate(-6deg); }
-  18%  { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+  0%   { opacity: 0; transform: translateY(20px) scale(0.5) rotate(-8deg); }
+  10%  { opacity: 1; transform: translateY(-8px) scale(1.18) rotate(2deg); }
+  20%  { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
   72%  { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-  88%  { opacity: 0.6; transform: translateY(-6px) scale(0.95) rotate(3deg); }
-  100% { opacity: 0; transform: translateY(-14px) scale(0.6) rotate(0deg); }
+  88%  { opacity: 0.6; transform: translateY(-8px) scale(0.92) rotate(4deg); }
+  100% { opacity: 0; transform: translateY(-20px) scale(0.5) rotate(0deg); }
+}
+
+/* Brush stroke painting under the letters */
+.bb-brush-stroke {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: bb-brush-paint 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 6px rgba(209, 42, 114, 0.45));
+}
+@keyframes bb-brush-paint {
+  0%   { stroke-dashoffset: 1200; opacity: 0; }
+  8%   { opacity: 1; }
+  55%  { stroke-dashoffset: 0; opacity: 1; }
+  85%  { stroke-dashoffset: -1200; opacity: 1; }
+  100% { stroke-dashoffset: -1200; opacity: 0; }
 }
 
 /* Sweeping highlight on the active filter pill while loading */
@@ -258,9 +272,11 @@ html, body {
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .bb-spinner, .bb-dots > span, .bb-shimmer::after, .bb-halo, .bb-live-dot::before,
-  .bb-progress-fill, .bb-fade-in-up, .bb-pill-loading::after, .bb-loader-bg, .bb-letter {
+  .bb-progress-fill, .bb-fade-in-up, .bb-pill-loading::after, .bb-loader-bg,
+  .bb-letter, .bb-brush-stroke {
     animation: none !important;
   }
   .bb-fade-in-up { opacity: 1; transform: none; }
   .bb-letter { opacity: 1; transform: none; }
+  .bb-brush-stroke { stroke-dashoffset: 0; opacity: 1; }
 }
