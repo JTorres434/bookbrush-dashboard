@@ -21,7 +21,9 @@ import { TodaysAlerts } from '@/components/TodaysAlerts';
 import { RecoveryJourney } from '@/components/RecoveryJourney';
 import { TenureHistogram } from '@/components/TenureHistogram';
 import { CalendarHeatmap } from '@/components/CalendarHeatmap';
+import { NewCustomersCard } from '@/components/NewCustomersCard';
 import { buildCustomerList, buildKpiCustomers } from '@/lib/customers';
+import { fetchNewCustomersInRange } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -54,6 +56,16 @@ export default async function DashboardPage({
   const journey = recoveryJourney({ ac, fc, fp, resub, range });
   const tenure = tenureHistogram({ ac, range });
   const heatmap = cancellationHeatmap({ ac, fc, fp });
+
+  // New customers — fetched from Stripe (only if STRIPE_SECRET_KEY is configured)
+  const knownReturningEmails = new Set(
+    resub.map((r) => (r['Email'] || '').toLowerCase()).filter(Boolean),
+  );
+  const newCustomersResult = await fetchNewCustomersInRange({
+    startMs: range.start.getTime(),
+    endMs: range.end.getTime(),
+    knownReturningEmails,
+  });
 
   // Daily series per KPI for sparklines
   const sparkCancel = series.map((d) => d.cancellations);
@@ -130,6 +142,14 @@ export default async function DashboardPage({
         <ErrorBoundary label="Today's Alerts"><TodaysAlerts alerts={alerts} /></ErrorBoundary>
 
         <ErrorBoundary label="KPI cards"><KpiGrid items={kpiItems} /></ErrorBoundary>
+
+        <ErrorBoundary label="New Customers">
+          <NewCustomersCard
+            configured={newCustomersResult.configured}
+            customers={newCustomersResult.customers}
+            rangeKey={rangeKey}
+          />
+        </ErrorBoundary>
 
         <ErrorBoundary label="Recovery Journey"><RecoveryJourney stages={journey} /></ErrorBoundary>
 
