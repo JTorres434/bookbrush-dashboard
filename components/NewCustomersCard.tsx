@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { UserPlus, DollarSign, TrendingUp, Sparkles } from 'lucide-react';
 import { Dialog, DialogStat, Avatar, PlanBadge } from './Dialog';
+import { MaybeCountUp } from './CountUp';
 import type { NewCustomerInfo } from '@/lib/stripe';
 
 export type NewCustomersBuckets = {
@@ -97,15 +98,21 @@ export function NewCustomersCard({
             customers.length > 0 ? 'cursor-pointer hover:opacity-90 transition' : 'cursor-default'
           }`}
         >
-          <div className="text-4xl font-bold text-emerald-600">{customers.length}</div>
-          <div className="mt-1 text-xs text-bb-ink/50">
-            {customers.length === 0
-              ? 'No new customers in this window.'
-              : `signed up & started paying in the ${filterLabel.toLowerCase()}`}
+          {/* key={filter} forces a remount on date-range switch so the
+              count-up replays from 0 and the description fades in fresh */}
+          <div key={filter} className="bb-fade-in-up">
+            <div className="text-4xl font-bold text-emerald-600 leading-none">
+              <MaybeCountUp value={customers.length} />
+            </div>
+            <div className="mt-2 text-xs text-bb-ink/50">
+              {customers.length === 0
+                ? 'No new customers in this window.'
+                : `signed up & started paying in the ${filterLabel.toLowerCase()}`}
+            </div>
+            {customers.length > 0 && (
+              <div className="mt-2 text-xs text-bb-purple/70">click to see who →</div>
+            )}
           </div>
-          {customers.length > 0 && (
-            <div className="mt-2 text-xs text-bb-purple/70">click to see who →</div>
-          )}
         </button>
       </div>
 

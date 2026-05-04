@@ -1,3 +1,5 @@
+import { LoadingTrivia } from './LoadingTrivia';
+
 /**
  * BOOKBRUSH letter-by-letter loader.
  * Each letter has its own gradient slice (so the spectrum reads B→H from
@@ -67,6 +69,7 @@ export function BookbrushLoader({ subtitle }: { subtitle?: string }) {
           {subtitle}
         </div>
       )}
+      <LoadingTrivia />
     </div>
   );
 }
