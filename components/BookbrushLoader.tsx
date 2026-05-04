@@ -17,6 +17,40 @@ const LETTERS = [
   { ch: 'H', from: '#de366f', to: '#e93e6e' },
 ];
 
+function CoverArt() {
+  return (
+    <svg
+      viewBox="0 0 40 60"
+      className="w-7 h-10 sm:w-8 sm:h-12"
+      aria-hidden
+    >
+      {/* Decorative top frame line */}
+      <line x1="8" y1="6" x2="32" y2="6" stroke="rgba(255,255,255,0.45)" strokeWidth="0.6" />
+      {/* Brush handle */}
+      <rect x="17" y="10" width="6" height="20" rx="2.5" fill="rgba(255,255,255,0.55)" />
+      <rect x="18.5" y="10" width="1" height="20" rx="0.5" fill="rgba(255,255,255,0.85)" />
+      {/* Ferrule */}
+      <rect x="14" y="29" width="12" height="3.5" fill="rgba(255,255,255,0.95)" rx="0.5" />
+      {/* Bristles */}
+      <path d="M 12 32.5 L 28 32.5 L 24.5 49 L 15.5 49 Z" fill="rgba(255,255,255,0.96)" />
+      <line x1="15" y1="34" x2="15" y2="48" stroke="rgba(91,31,158,0.35)" strokeWidth="0.4" />
+      <line x1="18" y1="34" x2="18" y2="49" stroke="rgba(91,31,158,0.35)" strokeWidth="0.4" />
+      <line x1="22" y1="34" x2="22" y2="49" stroke="rgba(91,31,158,0.35)" strokeWidth="0.4" />
+      <line x1="25" y1="34" x2="25" y2="48" stroke="rgba(91,31,158,0.35)" strokeWidth="0.4" />
+      {/* Paint stroke at the bottom */}
+      <path
+        d="M 6 55 Q 20 50 34 55"
+        stroke="rgba(255,255,255,0.85)"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* Decorative bottom frame line */}
+      <line x1="8" y1="58" x2="32" y2="58" stroke="rgba(255,255,255,0.45)" strokeWidth="0.6" />
+    </svg>
+  );
+}
+
 function OpeningBook() {
   return (
     <div className="bb-book" aria-hidden>
@@ -24,8 +58,12 @@ function OpeningBook() {
       <div className="bb-book-page" style={{ animationDelay: '0.2s' }} />
       <div className="bb-book-page" style={{ animationDelay: '0.55s' }} />
       <div className="bb-book-page" style={{ animationDelay: '0.9s' }} />
-      <div className="bb-book-cover front-left" />
-      <div className="bb-book-cover front-right" />
+      <div className="bb-book-cover front-left">
+        <CoverArt />
+      </div>
+      <div className="bb-book-cover front-right">
+        <CoverArt />
+      </div>
     </div>
   );
 }

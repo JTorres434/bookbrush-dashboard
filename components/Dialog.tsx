@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
-const EXIT_MS = 180;
+const EXIT_MS = 220;
 
 export function Dialog({
   title,

@@ -193,22 +193,41 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Dialog enter / leave animations (CSS keyframes — fire automatically on mount,
-   no React render-timing dependency) */
+/* Dialog enter / leave animations — modal opens like a book cover swinging
+   from its spine. Uses rotateY around the left edge with perspective for depth. */
 @keyframes bb-backdrop-in  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes bb-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes bb-dialog-in {
-  from { opacity: 0; transform: scale(0.92) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  0%   {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(-92deg) translateZ(-30px) scale(0.96);
+  }
+  55%  { opacity: 1; }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) translateZ(0) scale(1);
+  }
 }
 @keyframes bb-dialog-out {
-  from { opacity: 1; transform: scale(1) translateY(0); }
-  to   { opacity: 0; transform: scale(0.96) translateY(8px); }
+  0%   {
+    opacity: 1;
+    transform: perspective(1400px) rotateY(0deg) translateZ(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(-78deg) translateZ(-20px) scale(0.96);
+  }
 }
-.bb-dialog-backdrop          { animation: bb-backdrop-in 220ms ease-out forwards; }
-.bb-dialog-backdrop.leaving  { animation: bb-backdrop-out 180ms ease-in forwards; }
-.bb-dialog-card              { animation: bb-dialog-in 280ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; transform-origin: center; }
-.bb-dialog-card.leaving      { animation: bb-dialog-out 180ms ease-in forwards; }
+.bb-dialog-backdrop          { animation: bb-backdrop-in 280ms ease-out forwards; }
+.bb-dialog-backdrop.leaving  { animation: bb-backdrop-out 220ms ease-in forwards; }
+.bb-dialog-card {
+  animation: bb-dialog-in 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+}
+.bb-dialog-card.leaving {
+  animation: bb-dialog-out 220ms cubic-bezier(0.55, 0, 0.7, 0.2) forwards;
+}
 
 /* ---------- Opening-book loader ---------- */
 .bb-book {
@@ -250,6 +269,9 @@ html, body {
   background: linear-gradient(135deg, #5b1f9e 0%, #8a4cd0 50%, #d12a72 100%);
   backface-visibility: hidden;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .bb-book-cover.front-left {
   left: 0;
@@ -260,20 +282,6 @@ html, body {
   right: 0;
   transform-origin: left center;
   animation: bb-cover-right 3.6s ease-in-out infinite;
-}
-.bb-book-cover::after {
-  /* tiny BB monogram on the cover so it reads as a book */
-  content: 'BB';
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 22px;
-  color: rgba(255,255,255,0.85);
-  letter-spacing: 1px;
-  font-family: 'Inter', sans-serif;
 }
 
 @keyframes bb-cover-left {
