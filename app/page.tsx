@@ -34,9 +34,7 @@ export default async function DashboardPage({
   const resubByPlan = planBreakdown(resub, range, 'Date Plan Reactivated');
 
   const needsReviewCount = needsReview.length;
-  const sheetUrl = `https://docs.google.com/spreadsheets/d/${
-    process.env.GOOGLE_SHEET_ID || '1DfiRBNQvXvVAiZtrV857a6TsgT8bjkEOJdjztIs5ePU'
-  }/edit`;
+  const sheetUrl = `https://docs.google.com/spreadsheets/d/${process.env.GOOGLE_SHEET_ID}/edit`;
 
   return (
     <>

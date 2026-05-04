@@ -56,7 +56,7 @@ git push -u origin main
 |---|---|
 | `DASHBOARD_PASSWORD` | a password of your choice (this is what your team types to sign in) |
 | `SESSION_SECRET` | run `openssl rand -base64 32` and paste the output, or just type any long random string |
-| `GOOGLE_SHEET_ID` | `1DfiRBNQvXvVAiZtrV857a6TsgT8bjkEOJdjztIs5ePU` |
+| `GOOGLE_SHEET_ID` | The sheet ID (from your sheet's URL between `/d/` and `/edit`) |
 
 4. **Deployments** → … → **Redeploy**.
 5. Open your Vercel URL, type the password, you're in.

@@ -2,7 +2,10 @@
 // Uses Google's public gviz endpoint, which works on any sheet shared as
 // "Anyone with the link can view".
 
-const SHEET_ID = process.env.GOOGLE_SHEET_ID || '1DfiRBNQvXvVAiZtrV857a6TsgT8bjkEOJdjztIs5ePU';
+const SHEET_ID = process.env.GOOGLE_SHEET_ID;
+if (!SHEET_ID) {
+  throw new Error('GOOGLE_SHEET_ID environment variable is required');
+}
 
 export type SheetRow = Record<string, string>;
 
