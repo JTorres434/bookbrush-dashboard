@@ -1,5 +1,8 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { readAllSheets } from '@/lib/sheets';
 import { computeKpis, dateRangePresets, timeSeriesByDay, planBreakdown } from '@/lib/metrics';
+import { AUTH_COOKIE_NAME, isAuthCookieValid } from '@/lib/auth';
 import { Header } from '@/components/Header';
 import { KpiCard } from '@/components/KpiCard';
 import { TimeSeriesChart } from '@/components/TimeSeriesChart';
@@ -14,6 +17,12 @@ export default async function DashboardPage({
 }: {
   searchParams: { range?: string };
 }) {
+  // Auth check (page-level instead of middleware to avoid Edge runtime quirks)
+  const cookieStore = cookies();
+  const authCookie = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+  const valid = await isAuthCookieValid(authCookie);
+  if (!valid) redirect('/signin');
+
   const { ac, fc, fp, resub, needsReview } = await readAllSheets();
   const presets = dateRangePresets();
   const rangeKey = searchParams.range && presets[searchParams.range] ? searchParams.range : 'Last 30 days';
