@@ -210,6 +210,116 @@ html, body {
 .bb-dialog-card              { animation: bb-dialog-in 280ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards; transform-origin: center; }
 .bb-dialog-card.leaving      { animation: bb-dialog-out 180ms ease-in forwards; }
 
+/* ---------- Opening-book loader ---------- */
+.bb-book {
+  position: relative;
+  width: 180px;
+  height: 120px;
+  perspective: 900px;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 18px 24px rgba(91, 31, 158, 0.28));
+}
+
+/* The closed-book back / pages stack visible underneath when open */
+.bb-book-spine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #2a0f4f 0%, #3e1671 50%, #5b1f9e 100%);
+  border-radius: 4px 8px 8px 4px;
+}
+.bb-book-spine::before {
+  /* page block inside */
+  content: '';
+  position: absolute;
+  inset: 6px 8px 6px 8px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #faf7ff 0px, #faf7ff 2px,
+    #ece4f8 2px, #ece4f8 3px
+  );
+  border-radius: 1px;
+}
+
+/* Covers swing open from the spine */
+.bb-book-cover {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #5b1f9e 0%, #8a4cd0 50%, #d12a72 100%);
+  backface-visibility: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+.bb-book-cover.front-left {
+  left: 0;
+  transform-origin: right center;
+  animation: bb-cover-left 3.6s ease-in-out infinite;
+}
+.bb-book-cover.front-right {
+  right: 0;
+  transform-origin: left center;
+  animation: bb-cover-right 3.6s ease-in-out infinite;
+}
+.bb-book-cover::after {
+  /* tiny BB monogram on the cover so it reads as a book */
+  content: 'BB';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 22px;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 1px;
+  font-family: 'Inter', sans-serif;
+}
+
+@keyframes bb-cover-left {
+  0%, 8%   { transform: rotateY(0deg); }
+  30%, 70% { transform: rotateY(-152deg); }
+  92%, 100%{ transform: rotateY(0deg); }
+}
+@keyframes bb-cover-right {
+  0%, 8%   { transform: rotateY(0deg); }
+  30%, 70% { transform: rotateY(152deg); }
+  92%, 100%{ transform: rotateY(0deg); }
+}
+
+/* Individual pages flipping right→left while the book is open */
+.bb-book-page {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 50%;
+  width: calc(50% - 6px);
+  background: linear-gradient(90deg, #ffffff 0%, #f6f3fb 100%);
+  transform-origin: left center;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  backface-visibility: hidden;
+  opacity: 0;
+  animation: bb-page-flip 3.6s ease-in-out infinite;
+}
+.bb-book-page::before {
+  content: '';
+  position: absolute;
+  inset: 8px 8px 8px 4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(91, 31, 158, 0.2) 0px, rgba(91, 31, 158, 0.2) 1px,
+    transparent 1px, transparent 6px
+  );
+}
+
+@keyframes bb-page-flip {
+  0%, 30%  { transform: rotateY(0deg); opacity: 0; }
+  34%      { opacity: 1; }
+  62%      { transform: rotateY(-152deg); opacity: 1; }
+  68%, 100%{ transform: rotateY(-152deg); opacity: 0; }
+}
+
 /* BOOKBRUSH letter-by-letter loader — each letter carries its own gradient
    (parent background-clip:text + transformed children doesn't paint reliably) */
 .bb-letter {
@@ -273,10 +383,14 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .bb-spinner, .bb-dots > span, .bb-shimmer::after, .bb-halo, .bb-live-dot::before,
   .bb-progress-fill, .bb-fade-in-up, .bb-pill-loading::after, .bb-loader-bg,
-  .bb-letter, .bb-brush-stroke {
+  .bb-letter, .bb-brush-stroke,
+  .bb-book-cover, .bb-book-page {
     animation: none !important;
   }
   .bb-fade-in-up { opacity: 1; transform: none; }
   .bb-letter { opacity: 1; transform: none; }
   .bb-brush-stroke { stroke-dashoffset: 0; opacity: 1; }
+  /* When motion is reduced, leave the book closed */
+  .bb-book-cover { transform: rotateY(0); }
+  .bb-book-page { opacity: 0; }
 }
