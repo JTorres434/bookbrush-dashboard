@@ -4,12 +4,12 @@ import { readAllSheets } from '@/lib/sheets';
 import { computeKpis, dateRangePresets, timeSeriesByDay, planBreakdown } from '@/lib/metrics';
 import { AUTH_COOKIE_NAME, isAuthCookieValid } from '@/lib/auth';
 import { Header } from '@/components/Header';
-import { KpiCard } from '@/components/KpiCard';
+import { KpiGrid } from '@/components/KpiGrid';
 import { TimeSeriesChart } from '@/components/TimeSeriesChart';
 import { PlanBreakdown } from '@/components/PlanBreakdown';
 import { DateRangePicker } from '@/components/DateRangePicker';
 import { CustomersTable } from '@/components/CustomersTable';
-import { buildCustomerList } from '@/lib/customers';
+import { buildCustomerList, buildKpiCustomers } from '@/lib/customers';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -19,7 +19,6 @@ export default async function DashboardPage({
 }: {
   searchParams: { range?: string };
 }) {
-  // Auth check (page-level instead of middleware to avoid Edge runtime quirks)
   const cookieStore = cookies();
   const authCookie = cookieStore.get(AUTH_COOKIE_NAME)?.value;
   const valid = await isAuthCookieValid(authCookie);
@@ -34,9 +33,50 @@ export default async function DashboardPage({
   const series = timeSeriesByDay({ ac, fc, resub, range });
   const cancelByPlan = planBreakdown(ac, range, 'Date Plan Ended');
   const resubByPlan = planBreakdown(resub, range, 'Date Plan Reactivated');
+  const kpiLists = buildKpiCustomers({ ac, fc, fp, resub, range });
 
   const needsReviewCount = needsReview.length;
   const sheetUrl = `https://docs.google.com/spreadsheets/d/${process.env.GOOGLE_SHEET_ID}/edit`;
+
+  const kpiItems = [
+    {
+      label: 'Cancellations',
+      value: kpis.cancellations,
+      tone: 'warn' as const,
+      customers: kpiLists.cancellations,
+      modalTitle: `Cancellations · ${rangeKey} (${kpiLists.cancellations.length})`,
+    },
+    {
+      label: 'Resubscriptions',
+      value: kpis.resubscriptions,
+      tone: 'positive' as const,
+      customers: kpiLists.resubscriptions,
+      modalTitle: `Resubscriptions · ${rangeKey} (${kpiLists.resubscriptions.length})`,
+    },
+    {
+      label: 'Net Change',
+      value: kpis.netChange > 0 ? `+${kpis.netChange}` : kpis.netChange,
+      tone: (kpis.netChange >= 0 ? 'positive' : 'warn') as 'positive' | 'warn',
+      customers: kpiLists.netChangeAll,
+      modalTitle: `Net Change · ${rangeKey} (cancellations + resubscriptions)`,
+    },
+    {
+      label: 'Win-back Rate',
+      value: kpis.winBackRate,
+      suffix: '%',
+      tone: 'neutral' as const,
+      customers: kpiLists.resubscriptions,
+      modalTitle: `Win-back Rate · ${rangeKey} (${kpiLists.resubscriptions.length} won back of ${kpiLists.cancellations.length} cancelled)`,
+    },
+    {
+      label: 'Failed Payments',
+      value: kpis.failedPaymentsAwaiting,
+      tone: 'neutral' as const,
+      hint: 'awaiting actual cancellation',
+      customers: kpiLists.failedPayments,
+      modalTitle: `Failed Payments · ${rangeKey} (${kpiLists.failedPayments.length})`,
+    },
+  ];
 
   return (
     <>
@@ -46,28 +86,13 @@ export default async function DashboardPage({
           <div>
             <h2 className="text-2xl font-bold text-bb-ink">Overview</h2>
             <p className="text-sm text-bb-ink/60 mt-1">
-              Reading from the live Google Sheet — refreshes every 60 seconds.
+              Reading from the live Google Sheet — refreshes every 60 seconds. Click any number to see the customer list.
             </p>
           </div>
           <DateRangePicker />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <KpiCard label="Cancellations" value={kpis.cancellations} tone="warn" />
-          <KpiCard label="Resubscriptions" value={kpis.resubscriptions} tone="positive" />
-          <KpiCard
-            label="Net Change"
-            value={kpis.netChange > 0 ? `+${kpis.netChange}` : kpis.netChange}
-            tone={kpis.netChange >= 0 ? 'positive' : 'warn'}
-          />
-          <KpiCard label="Win-back Rate" value={kpis.winBackRate} suffix="%" tone="neutral" />
-          <KpiCard
-            label="Failed Payments"
-            value={kpis.failedPaymentsAwaiting}
-            tone="neutral"
-            hint="awaiting actual cancellation"
-          />
-        </div>
+        <KpiGrid items={kpiItems} />
 
         <TimeSeriesChart data={series} />
 

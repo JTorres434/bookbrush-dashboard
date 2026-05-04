@@ -58,3 +58,38 @@ export function buildCustomerList(opts: {
   for (const r of opts.resub) { const c = rowToCustomer(r, 'Resubscriptions');    if (c) out.push(c); }
   return out;
 }
+
+// Build customer lists for each KPI, filtered to the date range.
+export function buildKpiCustomers(opts: {
+  ac: SheetRow[];
+  fc: SheetRow[];
+  fp: SheetRow[];
+  resub: SheetRow[];
+  range: { start: Date; end: Date };
+}) {
+  const startMs = opts.range.start.getTime();
+  const endMs = opts.range.end.getTime();
+  const inRange = (c: Customer) =>
+    c.dateValue > 0 && c.dateValue >= startMs && c.dateValue <= endMs;
+
+  const acCustomers = opts.ac
+    .map((r) => rowToCustomer(r, 'Already Cancelled'))
+    .filter((c): c is Customer => !!c);
+  const fcCustomers = opts.fc
+    .map((r) => rowToCustomer(r, 'Future Cancellation'))
+    .filter((c): c is Customer => !!c);
+  const fpCustomers = opts.fp
+    .map((r) => rowToCustomer(r, 'Failed Payments'))
+    .filter((c): c is Customer => !!c);
+  const resubCustomers = opts.resub
+    .map((r) => rowToCustomer(r, 'Resubscriptions'))
+    .filter((c): c is Customer => !!c);
+
+  const cancellations = [...acCustomers, ...fcCustomers, ...fpCustomers].filter(inRange);
+  const resubscriptions = resubCustomers.filter(inRange);
+  const failedPayments = fpCustomers.filter(inRange);
+  // Net change = combine resubs + cancellations together so user can see both sides
+  const netChangeAll = [...cancellations, ...resubscriptions];
+
+  return { cancellations, resubscriptions, failedPayments, netChangeAll };
+}
